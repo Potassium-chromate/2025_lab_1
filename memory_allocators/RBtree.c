@@ -179,10 +179,10 @@ void rb_transplant(block_t **root, block_t *u, block_t *v) {
 }
 
 void delete_fixup(block_t **root, block_t *x) {
-    while (x != *root && (!x || x->color == BLACK)) {
+    while (x != *root && (!x || x->color == BLACK) && (x->parent)) {
         if (x == x->parent->l) { // x is a left child
             block_t *w = x->parent->r; // Sibling of x
-
+            
             // Case 1: Sibling w is RED
             if (w->color == RED) {
                 w->color = BLACK;
@@ -190,7 +190,7 @@ void delete_fixup(block_t **root, block_t *x) {
                 rotate_left(root, x->parent);
                 w = x->parent->r;
             }
-
+	    
             // Case 2: Both of w's children are BLACK
             if ((!w->l || w->l->color == BLACK) && (!w->r || w->r->color == BLACK)) {
                 w->color = RED;
@@ -212,8 +212,8 @@ void delete_fixup(block_t **root, block_t *x) {
                 x = *root; // End loop
             }
         } else { // Mirror cases where x is a right child
-            block_t *w = x->parent->l;
-
+            block_t *w = x->parent->l;    
+                
             // Case 1: Sibling w is RED
             if (w->color == RED) {
                 w->color = BLACK;
@@ -244,7 +244,8 @@ void delete_fixup(block_t **root, block_t *x) {
             }
         }
     }
-    if (x) x->color = BLACK; // Restore black balance
+    if (x) 
+        x->color = BLACK; // Restore black balance
 }
 
 // Create new block
@@ -317,7 +318,7 @@ void generate_graviz(block_t *root){
 
 int main() {
     srand( time(NULL) );
-    int array_size = 30;
+    int array_size = 3000;
     // Generate random number table
     int rand_table[array_size];
     for (int i = 0; i < array_size; i++)
@@ -330,15 +331,13 @@ int main() {
         rand_table[idx1] = rand_table[idx2];
         rand_table[idx2] = temp;
     }
-      
     
-    srand( time(NULL) );
     for(int i = 0; i < array_size; i++) {
         block_t *new = new_block(rand_table[i]);
         rb_insert(&root, new);
     }
     
-    generate_graviz(root);
+    //generate_graviz(root);
     
     // Shuffle the array again
     for (int i = 0; i < array_size * 100; i++){
@@ -349,14 +348,13 @@ int main() {
         rand_table[idx2] = temp;
     }
     // Remove the first 10 nodes
-    for(int i = 0; i < 10; i++) {
-        printf("remove: %d\n", rand_table[i]);
+    for(int i = 0; i < array_size/2; i++) {
+        //printf("remove: %d\n", rand_table[i]);
         block_t *target = find_block(root, rand_table[i]);
         rb_delete(&root, target);
     }
     // Print the tree after remove nodes
-    generate_graviz(root);
-    
+    //generate_graviz(root);
     return 0;
 }
 

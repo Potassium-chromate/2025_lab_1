@@ -21,7 +21,8 @@ void remove_free_tree(block_t **root, block_t *target)
 {
     /* Locate the pointer to the target node in the tree. */
     block_t **node_ptr = find_free_tree(root, target);
-
+    if (!node_ptr)
+        return;
     /* If the target node has two children, we need to find a replacement. */
     if ((*node_ptr)->l && (*node_ptr)->r) {
         /* Find the in-order predecessor:
@@ -139,55 +140,45 @@ block_t *choose_rand_b(block_t **b_table, int b_num){
 /* Main function to test the tree implementation. */
 int main() {
     block_t *root = NULL;
-    srand( time(NULL) );
-    
-    int b_num = 25;
-    block_t *b_table[b_num];
-    for (int i = 0; i < b_num; i++){
-        int rand_num = rand() % 1000;
-        if (i == 0)
-            rand_num = 500;
-        block_t *b = new_block(rand_num);
-        b_table[i] = b;
-        insert_free_tree(&root, b);
-    }
-        
-    
-    printf("Free Tree (Inorder Traversal):\n");
-    print_free_tree(root);
-    printf("\n");
-    print_free_tree_graviz(root);
-    printf("\n");
+    srand(time(NULL));
 
-    /* Test removing nodes */
-    block_t *remove_b = choose_rand_b(b_table, b_num);
-    printf("Removing node %ld...\n", remove_b->size);
-    remove_free_tree(&root, remove_b);
-    print_free_tree(root);
-    printf("\n");
-    print_free_tree_graviz(root);
-    printf("\n");
+    int array_size = 3000;
 
-    remove_b = choose_rand_b(b_table, b_num);
-    printf("Removing node %ld...\n", remove_b->size);
-    remove_free_tree(&root, remove_b);
-    print_free_tree(root);
-    printf("\n");
-    print_free_tree_graviz(root);
-    printf("\n");
-
-    remove_b = choose_rand_b(b_table, b_num);
-    printf("Removing node %ld...\n", remove_b->size);
-    remove_free_tree(&root, remove_b);
-    print_free_tree(root);
-    printf("\n");
-    print_free_tree_graviz(root);
-    printf("\n");
-
-    /* Free memory */
-    for (int i = 0; i < b_num; i++){
-        free(b_table[i]);
+    block_t **rand_table = (block_t **)malloc(array_size * sizeof(block_t *));
+    if (!rand_table) {
+        fprintf(stderr, "Memory allocation failed\n");
+        return EXIT_FAILURE;
     }
 
+    for (int i = 0; i < array_size; i++)
+        rand_table[i] = new_block((size_t)i);
+
+    for (int i = 0; i < array_size * 100; i++) {
+        int idx1 = rand() % array_size;
+        int idx2 = rand() % array_size;
+        block_t *temp = rand_table[idx1];
+        rand_table[idx1] = rand_table[idx2];
+        rand_table[idx2] = temp;
+    }
+
+    for (int i = 0; i < array_size; i++) {
+        block_t *new = new_block(rand_table[i]->size);
+        insert_free_tree(&root, new);
+    }
+
+    for (int i = 0; i < array_size * 100; i++) {
+        int idx1 = rand() % array_size;
+        int idx2 = rand() % array_size;
+        block_t *temp = rand_table[idx1];
+        rand_table[idx1] = rand_table[idx2];
+        rand_table[idx2] = temp;
+    }
+
+    for (int i = 0; i < array_size; i++) {
+        block_t *remove_b = rand_table[i];
+        remove_free_tree(&root, remove_b);
+    }
+
+    free(rand_table);
     return 0;
 }
