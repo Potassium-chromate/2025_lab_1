@@ -2,6 +2,7 @@
 #include "list.h"
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
@@ -72,22 +73,22 @@ static void list_quicksort(struct list_head *head)
     INIT_LIST_HEAD(&list_less);
     INIT_LIST_HEAD(&list_greater);
 
-    pivot = list_first_entry(head, struct listitem, list); //AAAA
-    list_del(&pivot->list);                          //BBBB
+    pivot = list_first_entry(head, struct listitem, list);//AAAA
+    list_del(&pivot->list);                               //BBBB
 
     list_for_each_entry_safe (item, is, head, list) {
         if (cmpint(&item->i, &pivot->i) < 0)
             list_move_tail(&item->list, &list_less);
         else
-            list_move_tail(&item->list, &list_greater); //CCCC
+            list_move_tail(&item->list, &list_greater);  //CCCC
     }
 
     list_quicksort(&list_less);
     list_quicksort(&list_greater);
 
-    list_add(&pivot->list, head);                //DDDD
-    list_splice(&list_less, head);                  //EEEE
-    list_splice_tail(&list_greater, head);          //FFFF
+    list_add(&pivot->list, head);                        //DDDD
+    list_splice(&list_less, head);                       //EEEE
+    list_splice_tail(&list_greater, head);               //FFFF
 }
 
 
@@ -126,6 +127,8 @@ int main(void)
     assert(i == ARRAY_SIZE(values));
     assert(list_empty(&testlist));
 
+    printf("%d\n", getnum());
+    printf("%d\n", getnum());
     return 0;
 }
 
