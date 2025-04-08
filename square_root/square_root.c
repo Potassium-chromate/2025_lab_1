@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #define clz32(x) clz2(x, 0)
 static const int mask[] = {0, 8, 12, 14};
@@ -25,7 +26,7 @@ static inline int clz64(uint64_t x)
     return (x >> 32) ? clz32((uint32_t) (x >> 32)) : clz32((uint32_t) x) + 32;
 }
 
-uint64_t sqrti(uint64_t x)
+uint64_t sqrti(uint64_t x, bool if_ceil)
 {
     uint64_t m, y = 0;
     if (x <= 1)
@@ -50,11 +51,14 @@ uint64_t sqrti(uint64_t x)
         }
         m >>= 2;
     }
+    
+    if (if_ceil)
+        return x != 0? y+1: y;
     return y;
 }
 
 int main(){
-    uint64_t result = sqrti(0);
+    uint64_t result = sqrti(1023, true);
     printf("%ld\n", result);
     
     return 0;
