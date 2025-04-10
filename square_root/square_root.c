@@ -57,9 +57,47 @@ uint64_t sqrti(uint64_t x, bool if_ceil)
     return y;
 }
 
+float Q_rsqrt(float number)
+{
+	long i;
+	float x2, y;
+	const float threehalfs = 1.5F;
+
+	x2 = number * 0.5F;
+	y  = number;
+	i  = * ( long * ) &y;                       // evil floating point bit level hacking
+	i  = 0x5f3759df - ( i >> 1 );               // what the fuck?
+	y  = * ( float * ) &i;
+	y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration
+	y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
+	y  = y * ( threehalfs - ( x2 * y * y ) );
+	
+	return y;
+}
+
+float Q_sqrt(float number)
+{
+
+	float rsqrt = Q_rsqrt(number);
+	float y = rsqrt;
+	
+	int i  = * ( int * ) &y;
+	i  = 0x7F000000 - i;                         // Do the reciprocal to the exponent
+	y  = * ( float * ) &i;                       // Convert the extimate value back to float
+	y = y * (2 - rsqrt * y);
+	y = y * (2 - rsqrt * y);
+	y = y * (2 - rsqrt * y);
+	return y;
+}
+
 int main(){
-    uint64_t result = sqrti(1023, true);
-    printf("%ld\n", result);
+    //uint64_t result = sqrti(1023, true);
+    //printf("%ld\n", result);
+    
+    float input = 1024.0;
+    float result = Q_sqrt(input);
+    printf("The sqrt of %f is %10f\n", input, result);
+    printf("The error is: %f\n", input - result * result);
     
     return 0;
 }
