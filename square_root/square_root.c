@@ -90,6 +90,36 @@ float Q_sqrt(float number)
 	return y;
 }
 
+int32_t Bi_sqrt(int n)
+{ 
+    float y = n;
+    
+    int32_t i  = * ( int32_t * ) &y;
+    //printf("Before i: %x\n", i);
+    i >>= 23;                              // Do the reciprocal to the exponent
+    i = ((i - 127) >> 1) + 127;            // Deivde the exponent by 2
+    i <<= 23;
+    //printf("After i: %x\n", i);
+    y  = * ( float * ) &i;
+    
+    i = (int32_t) y;
+    // Do the binary search to estimate value;
+    unsigned int head = i;                 // 2^i
+    unsigned int tail = (i + 1) << 1;      // 2^(i+1)
+    unsigned int mid = (head + tail) >> 1; // same as (2^m + 2^(m+1)) / 2
+    while (1) {
+        if (n > (mid + 1) * (mid + 1)) {
+            head = mid; 
+            mid = (head + tail) >> 1;
+        } else if (n < mid * mid) {
+            tail = mid; 
+            mid = (head + tail) >> 1;
+        } else
+            break;
+    }
+    return mid;
+}
+
 int main(){
     //uint64_t result = sqrti(1023, true);
     //printf("%ld\n", result);
